@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{068A47D7-F3FF-4BD7-A757-24B52AAFBDFA}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="AptSA.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="AptSA">
+        <MSBuild Projects="AptSA.dproj"/>
+    </Target>
+    <Target Name="AptSA:Clean">
+        <MSBuild Projects="AptSA.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="AptSA:Make">
+        <MSBuild Projects="AptSA.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="AptSA"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="AptSA:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="AptSA:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

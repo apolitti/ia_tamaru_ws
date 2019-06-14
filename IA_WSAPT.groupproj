@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{1AB1039F-315C-4EC7-98E5-E79B47EC5599}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="IA_WSAPTEXE.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Service\IA_WSAPTSRV.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="IA_WSAPTEXE">
+        <MSBuild Projects="IA_WSAPTEXE.dproj"/>
+    </Target>
+    <Target Name="IA_WSAPTEXE:Clean">
+        <MSBuild Projects="IA_WSAPTEXE.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="IA_WSAPTEXE:Make">
+        <MSBuild Projects="IA_WSAPTEXE.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="IA_WSAPTSRV">
+        <MSBuild Projects="Service\IA_WSAPTSRV.dproj"/>
+    </Target>
+    <Target Name="IA_WSAPTSRV:Clean">
+        <MSBuild Projects="Service\IA_WSAPTSRV.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="IA_WSAPTSRV:Make">
+        <MSBuild Projects="Service\IA_WSAPTSRV.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="IA_WSAPTEXE;IA_WSAPTSRV"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="IA_WSAPTEXE:Clean;IA_WSAPTSRV:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="IA_WSAPTEXE:Make;IA_WSAPTSRV:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

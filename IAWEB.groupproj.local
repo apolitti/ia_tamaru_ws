@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2018/08/24 10:02:07.000.489,C:\Users\Usuario\Documents\Embarcadero\Studio\Projects\ProjectGroup1.groupproj=C:\Users\Usuario\Documents\Embarcadero\Studio\Projects\Project1\IAWEB.groupproj</Transaction>
+  </Transactions>
+	<Default.Personality>
+		<Projects ActiveProject="\\10.0.9.1\Apto\Ribfer\Server\AptSA.dproj"/>
+	</Default.Personality>
+</BorlandProject>
