@@ -141,9 +141,12 @@ type
     procedure acceptp_inspecao_exe( p_fil_in_codigo, p_cmaq_in_codigo, p_ord_in_codigo : string);
 
     procedure acceptp_followup_lst(pParams : String);
+    procedure acceptp_operador_lst(pParams : String);
     procedure acceptp_maquina_lst;
 
     function f_impressao_lst(p_imp_st_servidor : string): TJSONArray;
+
+    procedure acceptp_evento_lst(pParams : String);
 
   end;
 
@@ -2704,6 +2707,82 @@ begin
 
   GetInvocationMetadata().ResponseCode    := 200;
   GetInvocationMetadata().ResponseContent := a.ToString;
+
+end;
+
+procedure TDSAptServer.acceptp_operador_lst(pParams : String);
+var
+  sqlQuery   : TFDQuery;
+  XML        : TStringList;
+  retorno    : TJSONArray;
+begin
+  FDConnection.Open();
+  sqlQuery := TFDQuery.Create(Self);
+  with sqlQuery do
+  begin
+    Close;
+    Connection := FDConnection;
+    SQL.Clear;
+    SQL.Add('begin');
+    SQL.Add('  mgcustom.ia_pck_ws_man_padrao.p_maquina_ordem_lst(');
+    SQL.Add('    p_params => :p_params,');
+    SQL.Add('    p_result => :p_result);');
+    SQL.Add('end;');
+
+    XML := TStringList.Create;
+    XML.Add(pParams);
+
+    SetParamB(sqlQuery ,'p_params', XML);
+    ParamByName('p_result').DataType  := ftCursor;
+    ParamByName('p_result').ParamType := ptOutput;
+    Open;
+  end;
+
+  retorno := TJSONArray.Create;
+  DataSetToJSONArray(retorno, sqlQuery);
+
+  GetInvocationMetadata().ResponseCode    := 200;
+  GetInvocationMetadata().ResponseContent := retorno.ToString;
+
+end;
+
+procedure TDSAptServer.acceptp_evento_lst(pParams : String);
+var
+  sqlQuery   : TFDQuery;
+  XML        : TStringList;
+  retorno    : TJSONArray;
+begin
+
+  FDConnection.Open();
+  sqlQuery := TFDQuery.Create(Self);
+  with sqlQuery do
+  begin
+    Close;
+    Connection := FDConnection;
+    SQL.Clear;
+    SQL.Add('BEGIN');
+    SQL.Add('  MGCUSTOM.IA_PCK_WS_MAN_PADRAO.P_EVENTO_LST(');
+    SQL.Add('	   P_PARAMS => :P_PARAMS,');
+    SQL.Add('    P_RESULT => :P_RESULT');
+    SQL.Add('  );');
+    SQL.Add('END;');
+
+    XML := TStringList.Create;
+    XML.Add(pParams);
+
+    SetParamB(sqlQuery ,'P_PARAMS', XML);
+
+    ParamByName('P_RESULT').DataType  := ftCursor;
+    ParamByName('P_RESULT').ParamType := ptOutput;
+
+    Open;
+  end;
+
+  retorno := TJSONArray.Create;
+  DataSetToJSONArray(retorno, sqlQuery);
+
+  GetInvocationMetadata().ResponseCode    := 200;
+  GetInvocationMetadata().ResponseContent := retorno.ToString;
 
 end;
 

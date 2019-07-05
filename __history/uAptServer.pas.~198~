@@ -27,10 +27,6 @@ type
     EmployeeTableCOMMISSION_PCT: TBCDField;
     EmployeeTableMANAGER_ID: TBCDField;
     EmployeeTableDEPARTMENT_ID: TBCDField;
-    ClientDataSet1: TClientDataSet;
-    FDStoredProc1: TFDStoredProc;
-    DataSource1: TDataSource;
-    FDStanStorageXMLLink1: TFDStanStorageXMLLink;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -144,7 +140,13 @@ type
     function  f_avisoetq_lst(p_fil_in_codigo, p_avr_st_nota, p_agn_st_cgc : string) : TJSONArray;
     procedure acceptp_inspecao_exe( p_fil_in_codigo, p_cmaq_in_codigo, p_ord_in_codigo : string);
 
-    procedure acceptp_followup_lst;
+    procedure acceptp_followup_lst(pParams : String);
+    procedure acceptp_operador_lst(pParams : String);
+    procedure acceptp_maquina_lst;
+
+    function f_impressao_lst(p_imp_st_servidor : string): TJSONArray;
+
+    procedure acceptp_evento_lst(pParams : String);
 
   end;
 
@@ -2592,7 +2594,66 @@ begin
 
 end;
 
-procedure TDSAptServer.acceptp_followup_lst;
+function TDSAptServer.f_impressao_lst(p_imp_st_servidor : string): TJSONArray;
+var
+  sqlQuery : TFDQuery;
+  a        : TJSONArray;
+begin
+
+  sqlQuery := TFDQuery.Create(Self);
+  a        := TJSONArray.Create;
+
+  try
+
+    try
+
+      FDConnection.Open();
+
+      with sqlQuery do
+      begin
+
+        Close;
+
+        Connection := FDConnection;
+
+        SQL.Clear;
+
+        SQL.Add('SELECT *');
+        SQL.Add('FROM   TABLE(MGCUSTOM.IA_PCK_IMPRESSORA.F_WS_IMPRESSAO_LST(P_IMP_ST_SERVIDOR => :P_IMP_ST_SERVIDOR))');
+
+        SetParam(sqlQuery , 'P_IMP_ST_SERVIDOR'  , 'S' , p_imp_st_servidor);
+
+        Open();
+
+      end;
+
+      if sqlQuery.IsEmpty = False then
+      begin
+        DataSetToJSONArray(a,sqlQuery);
+      end;
+
+    except
+      on e: exception do
+      begin
+        GetInvocationMetadata.ResponseCode    := 417;
+        GetInvocationMetadata.ResponseMessage := e.Message;
+      end;
+    end;
+
+  finally
+
+    sqlQuery.Close;
+    sqlQuery.Free;
+
+    FDConnection.Close;
+
+    Result := a;
+
+  end;
+
+end;
+
+procedure TDSAptServer.acceptp_followup_lst(pParams : String);
 var
   i          : Integer;
   XML        : TStringList;
@@ -2631,6 +2692,140 @@ begin
     SQL.Add('end;');
 
     XML := TStringList.Create;
+    XML.Add(pParams);
+
+    SetParamB(sqlQuery ,'p_params', XML);
+
+    ParamByName('p_result').DataType  := ftCursor;
+    ParamByName('p_result').ParamType := ptOutput;
+
+    Open;
+  end;
+
+  a := TJSONArray.Create;
+  DataSetToJSONArray(a,sqlQuery);
+
+  GetInvocationMetadata().ResponseCode    := 200;
+  GetInvocationMetadata().ResponseContent := a.ToString;
+
+end;
+
+procedure TDSAptServer.acceptp_operador_lst(pParams : String);
+var
+  sqlQuery   : TFDQuery;
+  XML        : TStringList;
+  retorno    : TJSONArray;
+begin
+  FDConnection.Open();
+  sqlQuery := TFDQuery.Create(Self);
+  with sqlQuery do
+  begin
+    Close;
+    Connection := FDConnection;
+    SQL.Clear;
+    SQL.Add('begin');
+    SQL.Add('  mgcustom.ia_pck_ws_man_padrao.p_maquina_ordem_lst(');
+    SQL.Add('    p_params => :p_params,');
+    SQL.Add('    p_result => :p_result);');
+    SQL.Add('end;');
+
+    XML := TStringList.Create;
+    XML.Add(pParams);
+
+    SetParamB(sqlQuery ,'p_params', XML);
+    ParamByName('p_result').DataType  := ftCursor;
+    ParamByName('p_result').ParamType := ptOutput;
+    Open;
+  end;
+
+  retorno := TJSONArray.Create;
+  DataSetToJSONArray(retorno, sqlQuery);
+
+  GetInvocationMetadata().ResponseCode    := 200;
+  GetInvocationMetadata().ResponseContent := retorno.ToString;
+
+end;
+
+procedure TDSAptServer.acceptp_evento_lst(pParams : String);
+var
+  sqlQuery   : TFDQuery;
+  XML        : TStringList;
+  retorno    : TJSONArray;
+begin
+
+
+  raise Exception.Create('AKI');
+
+
+  FDConnection.Open();
+  sqlQuery := TFDQuery.Create(Self);
+  with sqlQuery do
+  begin
+    Close;
+    Connection := FDConnection;
+    SQL.Clear;
+    SQL.Add('MGCUSTOM.IA_PCK_WS_MAN_PADRAO.P_EVENTO_LST(');
+    SQL.Add('	  P_PARAMS => P_PARAMS,');
+    SQL.Add('    P_RESULT => :P_RESULT');
+    SQL.Add('  );');
+    SQL.Add('END;');
+
+    XML := TStringList.Create;
+    XML.Add(pParams);
+
+    SetParamB(sqlQuery ,'p_params', XML);
+    ParamByName('p_result').DataType  := ftCursor;
+    ParamByName('p_result').ParamType := ptOutput;
+    Open;
+  end;
+
+  retorno := TJSONArray.Create;
+  DataSetToJSONArray(retorno, sqlQuery);
+
+  GetInvocationMetadata().ResponseCode    := 200;
+  GetInvocationMetadata().ResponseContent := retorno.ToString;
+
+end;
+
+procedure TDSAptServer.acceptp_maquina_lst;
+var
+  i          : Integer;
+  XML        : TStringList;
+  LJsonArr   : TJSONArray;
+  LJsonValue : TJSONValue;
+  LItem      : TJSONValue;
+  chave      : string;
+  valor      : string;
+  sqlQuery   : TFDQuery;
+  jsonobject : TJSONObject;
+
+  a            : TJSONArray;
+
+  resultStream : TStream;
+  stringStream : TStringList;
+
+  teste : TStringStream;
+
+begin
+
+  FDConnection.Open();
+
+  sqlQuery := TFDQuery.Create(Self);
+  with sqlQuery do
+  begin
+    Close;
+
+    Connection := FDConnection;
+
+    SQL.Clear;
+
+    SQL.Add('begin');
+    SQL.Add('  mgcustom.ia_pck_ws_man_padrao.p_maquina_lst(');
+    SQL.Add('    p_params => :p_params,');
+    SQL.Add('    p_result => :p_result);');
+    SQL.Add('end;');
+
+    XML := TStringList.Create;
     XML.Add('<parametros>');
     XML.Add('    <org_in_codigo>2</org_in_codigo>');
     XML.Add('</parametros>');
@@ -2643,18 +2838,10 @@ begin
     Open;
   end;
 
-  a        := TJSONArray.Create;
+  a := TJSONArray.Create;
   DataSetToJSONArray(a,sqlQuery);
 
-  //teste := TStringStream.Create;
-  //resultStream := TStream.Create;
-  //sqlQuery.SaveToStream(teste, sfXML);
-
-  //jsonobject := TJSONObject.Create;
-  //jsonobject.AddPair('result', teste.DataString);
-
   GetInvocationMetadata().ResponseCode    := 200;
-  //GetInvocationMetadata().ResponseContent := 'Ola mundo...';
   GetInvocationMetadata().ResponseContent := a.ToString;
 
 end;
